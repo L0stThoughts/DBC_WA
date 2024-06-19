@@ -65,46 +65,38 @@
 </head>
 
 <body>
-    <?php
+<?php
+require_once "./classes/DBC.php";
 
-    if (isset($_POST["submit"])) {
-        $username = $_POST["username"];
-        $password = $_POST["password"];
+if(isset($_POST["register"])) {
+    $username = $_POST["username"];
+    $password = $_POST["password"];
 
-        $password_hash = password_hash($password, PASSWORD_DEFAULT);
-        $errors = array();
 
-        if (empty($username) || empty($password)) {
-            array_push($errors, "All fields are required");
-        }
-
-        if (strlen($password) < 3) {
-            array_push($errors, "Username can't be less than 3 letters");
-        }
-
-        if (strlen($password) < 8) {
-            array_push($errors, "Username can't be less than 8 letters");
-        }
-
-        if (count($errors) > 0) {
-            foreach ($errors as $error) {
-                echo "<div class='alert alert-danger'>$error</div>";
-            }
+    if(DBC::getUser($username)) {
+            $_SESSION["message"] = "User already exists.";
+            header("Location: registration.php"); 
+            exit();
+    } else {
+        if(DBC::insertUser($username, $password)) {
+            $_SESSION["message"] = "Registration successful. You can now log in.";
+            header("Location: index.php"); 
+            exit();
         } else {
-            require_once("./classes/DBC.php");
-            $sql = "INSERT INTO users(username, password) VALUES (?, ?)";
-            $stmt = mysqli_stmt_init($conn);
-            $prepareStmt = mysqli_stmt_prepare($stmt, $sql);
-            if ($prepareStmt) {
-                mysqli_stmt_bind_param($stmt, "ss", $username, $password_hash);
-                mysqli_stmt_execute($stmt);
-                echo "You registered successfully";
-            } else {
-                die("Something went wrong");
-            }
+            $_SESSION["message"] = "Registration unsuccessful. Try again.";
+            header("Location: registration.php"); 
+            exit();
         }
     }
-    ?>
+}
+
+if (isset($_SESSION["message"])) {
+    $message = $_SESSION["message"];
+    echo "<script>alert('$message');</script>";
+    unset($_SESSION["message"]);
+}
+
+?>
     <div class="login-container">
         <h2>Registration Form</h2>
         <form action="registration.php" method="post">
