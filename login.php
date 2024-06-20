@@ -1,6 +1,5 @@
 <?php
 session_start();
-require_once "./classes/User.php";
 require_once "./classes/DBC.php";
 
 if(isset($_POST["username"]) && isset($_POST["password"])) {
@@ -9,7 +8,7 @@ if(isset($_POST["username"]) && isset($_POST["password"])) {
 
     $user = DBC::getUser($username);
 
-    if($user && password_verify($password,$user["password"])) {
+    if($user && password_verify($password, $user["password"])) {
         $_SESSION["username"] = $username;
         $_SESSION["message"] = "Login successful.";
         header("Location: home.php"); 
@@ -27,3 +26,23 @@ if (isset($_SESSION["message"])) {
     unset($_SESSION["message"]);
 }
 ?>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <link rel="stylesheet" href="./css/login.css">
+</head>
+<body>
+    <div class="login-container">
+        <h2>Login</h2>
+        <form method="POST" action="login.php">
+            <input type="text" name="username" placeholder="Username" required>
+            <input type="password" name="password" placeholder="Password" required>
+            <button type="submit">Login</button>
+        </form>
+    </div>
+</body>
+</html>
